@@ -1,5 +1,6 @@
+# -*- coding: utf-8 -*-
 
-####################################################################################################
+from common import *
 
 MUSIC_PREFIX = "/music/sverigesradioplay"
 
@@ -63,9 +64,9 @@ def Start():
     ## pass these parameters to these object types
     ## every single time
     MediaContainer.art = R(ART)
-    MediaContainer.title1 = L("Title")
+    MediaContainer.title1 = TEXT_TITLE
     DirectoryItem.thumb = R(ICON_SR)
-    DirectoryItem.summary = L("Summary")
+    DirectoryItem.summary = TEXT_SUMMARY
 
 
 #### the rest of these are user created functions and
@@ -79,17 +80,17 @@ def Start():
 def MainMenu():
 
     dir = ObjectContainer(view_group="List")
-    dir.title1 = L("Title")
+    dir.title1 = TEXT_TITLE
     dir.art = R(ART)
 
     #  Add ListenLiveMenu
-    dir.add(DirectoryObject(title=L("ListenLiveTitle"), summary=L("ListenLiveSummary"), tagline=L("ListenLiveSubtitle"), key=Callback(ListenLiveMenu), thumb=R(ICON_DIREKT), art=R(ART)))
+    dir.add(DirectoryObject(title=TEXT_LIVE_SHOWS, summary=TEXT_LIVE_SUMMARY, tagline=TEXT_LIVE_TAGLINE, key=Callback(ListenLiveMenu), thumb=R(ICON_DIREKT), art=R(ART)))
 
     #  Add MainPodcastMenu
-    dir.add(DirectoryObject(title=L("PodMainTitle"), summary=L("PodDescription"), tagline=L("PodMainSubtitle"), key=Callback(MainPodcastMenu), thumb=R(ICON_ARKIV), art=R(ART)))
+    dir.add(DirectoryObject(title=TEXT_POD_MAIN_TITLE, summary=TEXT_POD_DESCRIPTIO, tagline=TEXT_POD_MAIN_TAGLINE, key=Callback(MainPodcastMenu), thumb=R(ICON_ARKIV), art=R(ART)))
 
     #  Add AllProgramsMenu
-    dir.add(DirectoryObject(title=L("AllProgramsTitle"), summary=L("AllProgramsSummary"), tagline=L("AllProgramsSubtitle"), key=Callback(AllProgramsMenu, categoryid=0, categorytitle=L("AllProgramsTitle")), thumb=R(ICON_ALLA), art=R(ART)))
+    dir.add(DirectoryObject(title=TEXT_ALL_PROG_TITLE, summary=TEXT_ALL_PROG_SUMMARY, tagline=TEXT_ALL_PROG_TAGLINE, key=Callback(AllProgramsMenu, categoryid=0, categorytitle=TEXT_ALL_PROG_TITLE), thumb=R(ICON_ALLA), art=R(ART)))
 
     #  Add Categories
     page = XML.ElementFromURL("http://api.sr.se/api/Poddradio/PoddCategories.aspx", cacheTime=CACHE_TIME_LONG)
@@ -130,8 +131,8 @@ def MainMenu():
 def ListenLiveMenu(sender):
 
     dir = MediaContainer(viewGroup="InfoList")
-    dir.title1 = L("Title")
-    dir.title2 = L("ListenLiveTitle")
+    dir.title1 = TEXT_TITLE
+    dir.title2 = TEXT_LIVE_TITLE
     dir.art = R(ART_DIREKT)
 
     page = XML.ElementFromURL("http://api.sr.se/api/channels/channels.aspx", cacheTime=CACHE_TIME_LONG)
@@ -169,10 +170,10 @@ def ListenLiveMenu(sender):
                 if info.findtext("Song"):
                     desc += str(info.findtext("Song")) + "\n\n"
                 if info.findtext("NextSong"):
-                    desc += L("NextProgram") + ":\n" + str(info.findtext("NextSong")) + "\n\n"
+                    desc += TEXT_NEXT_PROGRAM + ":\n" + str(info.findtext("NextSong")) + "\n\n"
 
             if info.findtext("NextProgramStartTime"):
-                desc += "\n" + L("NextProgram") + ":\n"
+                desc += "\n" + TEXT_NEXT_PROGRAM + ":\n"
                 if info.findtext("NextProgramTitle"):
                     desc += str(info.findtext("NextProgramTitle")) + " (" + str(info.findtext("NextProgramStartTime")) + ")\n"
                     if info.findtext("NextProgramDescription"):
@@ -195,7 +196,7 @@ def ListenLiveMenu(sender):
 def AllProgramsMenu(sender, categoryid, categorytitle):
 
     dir = MediaContainer(viewGroup="InfoList")
-    dir.title1 = L("Title")
+    dir.title1 = TEXT_TITLE 
     dir.title2 = categorytitle
     dir.art = R(ART)
 
@@ -250,7 +251,7 @@ def ProgramMenu(sender, poddid, unitid):
     page = XML.ElementFromURL(feedurl, cacheTime=CACHE_TIME_SHORT)
 
     dir = MediaContainer(viewGroup="InfoList")
-    dir.title1 = L("Title")
+    dir.title1 = TEXT_TITLE 
     dir.title2 = page.findtext("title")
     dir.art = R(ART)
 
@@ -281,9 +282,9 @@ def ProgramMenu(sender, poddid, unitid):
             Function(
                 DirectoryItem(
                     PodcastMenu,
-                    L("PodItemTitle"),
-	            subtitle=L("PodItemSubtitle"),
-	            summary=L("PodDescription"),
+                    TEXT_POD_ITEM_TITLE,
+	            subtitle=TEXT_POD_ITEM_TAGLINE,
+	            summary=TEXT_POD_DESCRIPTION,
 	            thumb=R(ICON_ARKIV),
 	            art=R(ART)
 	        ),
@@ -298,7 +299,7 @@ def ProgramMenu(sender, poddid, unitid):
 def MainPodcastMenu(sender):
 
     dir = MediaContainer(viewGroup="List")
-    dir.title1 = L("PodTitle")
+    dir.title1 = TEXT_POD_TITLE
     dir.art = R(ART_POD)
 
     #  Add AllPodcastsMenu
@@ -306,14 +307,14 @@ def MainPodcastMenu(sender):
         Function(
             DirectoryItem(
                 AllPodcastsMenu,
-                L("AllProgramsTitle"),
-                subtitle=L("AllProgramsSubtitle"),
-                summary=L("AllProgramsSummary"),
+                TEXT_ALL_PROG_TITLE,
+                subtitle=TEXT_ALL_PROG_TAGLINE,
+                summary=TEXT_ALL_PROG_SUMMARY,
                 thumb=R(ICON_ALLA_POD),
                 art=R(ART_POD)
             ),
             categoryid=0,
-            categorytitle=L("AllProgramsTitle")
+            categorytitle=TEXT_ALL_PROG_TITLE
         )
     )
 
@@ -371,7 +372,7 @@ def MainPodcastMenu(sender):
 def AllPodcastsMenu(sender, categoryid, categorytitle):
 
     dir = MediaContainer(viewGroup="InfoList")
-    dir.title1 = L("PodTitle")
+    dir.title1 = TEXT_POD_TITLE 
     dir.title2 = categorytitle
     dir.art = R(ART_POD)
 
@@ -412,7 +413,7 @@ def PodcastMenu(sender, poddid, unitid):
     page = XML.ElementFromURL(poddurl, cacheTime=CACHE_TIME_SHORT)
 
     dir = MediaContainer(viewGroup="InfoList")
-    dir.title1 = L("PodTitle")
+    dir.title1 = TEXT_POD_TITLE 
     dir.title2 = page.findtext("channel/title")
     dir.art = R(ART_POD)
 
