@@ -1,3 +1,4 @@
+
 ####################################################################################################
 
 MUSIC_PREFIX = "/music/sverigesradioplay"
@@ -77,53 +78,18 @@ def Start():
 
 def MainMenu():
 
-    dir = MediaContainer(viewGroup="List")
+    dir = ObjectContainer(view_group="List")
     dir.title1 = L("Title")
     dir.art = R(ART)
 
     #  Add ListenLiveMenu
-    dir.Append(
-        Function(
-            DirectoryItem(
-                ListenLiveMenu,
-                L("ListenLiveTitle"),
-                subtitle=L("ListenLiveSubtitle"),
-                summary=L("ListenLiveSummary"),
-                thumb=R(ICON_DIREKT),
-                art=R(ART)
-            )
-        )
-    )
+    dir.add(DirectoryObject(title=L("ListenLiveTitle"), summary=L("ListenLiveSummary"), tagline=L("ListenLiveSubtitle"), key=Callback(ListenLiveMenu), thumb=R(ICON_DIREKT), art=R(ART)))
 
     #  Add MainPodcastMenu
-    dir.Append(
-        Function(
-            DirectoryItem(
-                MainPodcastMenu,
-                L("PodMainTitle"),
-                subtitle=L("PodMainSubtitle"),
-                summary=L("PodDescription"),
-                thumb=R(ICON_ARKIV),
-                art=R(ART)
-            )
-        )
-    )
+    dir.add(DirectoryObject(title=L("PodMainTitle"), summary=L("PodDescription"), tagline=L("PodMainSubtitle"), key=Callback(MainPodcastMenu), thumb=R(ICON_ARKIV), art=R(ART)))
 
     #  Add AllProgramsMenu
-    dir.Append(
-        Function(
-            DirectoryItem(
-                AllProgramsMenu,
-                L("AllProgramsTitle"),
-                subtitle=L("AllProgramsSubtitle"),
-                summary=L("AllProgramsSummary"),
-                thumb=R(ICON_ALLA),
-                art=R(ART)
-            ),
-            categoryid=0,
-            categorytitle=L("AllProgramsTitle")
-        )
-    )
+    dir.add(DirectoryObject(title=L("AllProgramsTitle"), summary=L("AllProgramsSummary"), tagline=L("AllProgramsSubtitle"), key=Callback(AllProgramsMenu, categoryid=0, categorytitle=L("AllProgramsTitle")), thumb=R(ICON_ALLA), art=R(ART)))
 
     #  Add Categories
     page = XML.ElementFromURL("http://api.sr.se/api/Poddradio/PoddCategories.aspx", cacheTime=CACHE_TIME_LONG)
@@ -157,23 +123,8 @@ def MainMenu():
         else:
             caticon = R(ICON_SR)
         
-        dir.Append(
-            Function(
-                DirectoryItem(
-                    AllProgramsMenu,
-                    title,
-                    subtitle="",
-                    summary="",
-                    thumb=caticon,
-                    art=R(ART)
-                ),
-                categoryid=int(item.findtext("id", default="0")),
-                categorytitle=title
-            )
-        )
-
-
-    # ... and then return the container
+        dir.add(DirectoryObject(title=title, key=Callback(AllProgramsMenu, categoryid=int(item.findtext("id", default="0")), categorytitle=title), thumb=caticon,art=R(ART)))        
+    
     return dir
 
 def ListenLiveMenu(sender):
