@@ -52,10 +52,7 @@ CACHE_TIME_SHORT   = 60*5     # 5 minutes
 
 def Start():
 
-    ## make this plugin show up in the 'Music' section
-    ## in Plex. The L() function pulls the string out of the strings
-    ## file in the Contents/Strings/ folder in the bundle
-    Plugin.AddPrefixHandler(MUSIC_PREFIX, MainMenu, L('MainTitle'), ICON, ART)
+    Plugin.AddPrefixHandler(MUSIC_PREFIX, MainMenu, TEXT_MAIN_TITLE, ICON, ART)
 
     Plugin.AddViewGroup("InfoList", viewMode="InfoList", mediaType="items")
     Plugin.AddViewGroup("List", viewMode="List", mediaType="items")
