@@ -1,6 +1,51 @@
 # -*- coding: utf-8 -*
 
 # Global constants
+MUSIC_PREFIX = "/music/sverigesradioplay"
+
+ART           = 'art-default.jpg'
+ART_DIREKT    = 'art-direkt.jpg'
+ART_POD       = 'art-pod.jpg'
+ICON          = 'icon-default.png'
+ICON_DIREKT   = 'c-direkt.png'
+ICON_ARKIV    = 'c-arkiv.png'
+ICON_ALLA     = 'c-alla.png'
+ICON_BARN     = 'c-barn.png'
+ICON_DOKU     = 'c-doku.png'
+ICON_KULT     = 'c-kult.png'
+ICON_LIV1     = 'c-liv1.png'
+ICON_LIV2     = 'c-liv2.png'
+ICON_MUSI     = 'c-musi.png'
+ICON_NYHE     = 'c-nyhe.png'
+ICON_SAMH     = 'c-samh.png'
+ICON_SPOR     = 'c-spor.png'
+ICON_SPRA     = 'c-spra.png'
+ICON_VETE     = 'c-vete.png'
+ICON_P1       = 'logo-p1.png'
+ICON_P2       = 'logo-p2.png'
+ICON_P3       = 'logo-p3.png'
+ICON_P4       = 'logo-p4.png'
+ICON_SR       = 'logo-sr.png'
+ICON_EXTRA    = 'logo-sr-ext.png'
+ICON_ALLA_POD = 'c-alla-pod.png'
+ICON_BARN_POD = 'c-barn-pod.png'
+ICON_DOKU_POD = 'c-doku-pod.png'
+ICON_KULT_POD = 'c-kult-pod.png'
+ICON_LIV1_POD = 'c-liv1-pod.png'
+ICON_LIV2_POD = 'c-liv2-pod.png'
+ICON_MUSI_POD = 'c-musi-pod.png'
+ICON_NYHE_POD = 'c-nyhe-pod.png'
+ICON_SAMH_POD = 'c-samh-pod.png'
+ICON_SPOR_POD = 'c-spor-pod.png'
+ICON_SPRA_POD = 'c-spra-pod.png'
+ICON_VETE_POD = 'c-vete-pod.png'
+ICON_SR_POD   = 'logo-sr-pod.png'
+
+ITUNES_NAMESPACE = {'itunes':'http://www.itunes.com/dtds/podcast-1.0.dtd'}
+
+CACHE_TIME_LONG    = 60*60*24 # 1 day
+CACHE_TIME_MEDIUM  = 60*60    # 1 hour
+CACHE_TIME_SHORT   = 60*5     # 5 minutes
 
 # Texts
 TEXT_TITLE = u'Sveriges Radio Play'
