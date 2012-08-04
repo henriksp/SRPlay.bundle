@@ -79,12 +79,9 @@ def MainMenu():
     
     return dir
 
-def ListenLiveMenu(sender):
+def ListenLiveMenu():
 
-    dir = MediaContainer(viewGroup="InfoList")
-    dir.title1 = TEXT_TITLE
-    dir.title2 = TEXT_LIVE_TITLE
-    dir.art = R(ART_DIREKT)
+    dir = ObjectContainer(view_group = "List", title1=TEXT_TITLE, title2=TEXT_LIVE_SHOWS, art = R(ART_DIREKT))
 
     page = XML.ElementFromURL("http://api.sr.se/api/channels/channels.aspx", cacheTime=CACHE_TIME_LONG)
     rightnow = XML.ElementFromURL("http://api.sr.se/api/rightnowinfo/rightnowinfo.aspx?filterinfo=all", cacheTime=None)
@@ -130,20 +127,29 @@ def ListenLiveMenu(sender):
                     if info.findtext("NextProgramDescription"):
                         desc += str(info.findtext("NextProgramDescription")) + "\n"
 
-        dir.Append(
-            TrackItem(
-                channel.findtext("streamingurl/url[@type='mp3']"),
-                ch_name,
-                subtitle=channel.findtext("tagline"),
-                summary=desc,
-                thumb=ch_thumb
-            )
+        url = channel.findtext("streamingurl/url[@type='mp3']")
+        Log.Info("live url %s", url)
+        track = TrackObject(title = ch_name, key =url, rating_key = MUSIC_PREFIX + "/live/" + ch_name, thumb = ch_thumb, art = R(ART_DIREKT))
+
+	media = MediaObject(
+                parts = [PartObject(key=Callback(PlayLiveAudio, url=url, ext='mp3'))],
+                container = Container.MP3,
+                audio_codec = AudioCodec.MP3
         )
 
+	track.add(media)
+        dir.add(track)
 
-    # ... and then return the container
+                #channel.findtext("streamingurl/url[@type='mp3']"),
+                #ch_name,
+                #subtitle=channel.findtext("tagline"),
+                #summary=desc,
+                #thumb=ch_thumb
     return dir
-  
+
+def PlayLiveAudio(url):
+    return Redirect(url)
+
 def AllProgramsMenu(sender, categoryid, categorytitle):
 
     dir = MediaContainer(viewGroup="InfoList")
