@@ -2,153 +2,196 @@
 
 from common import *
 
-####################################################################################################
-
 def Start():
 
-    Plugin.AddPrefixHandler(MUSIC_PREFIX, MainMenu, TEXT_MAIN_TITLE, ICON, ART)
+	Plugin.AddPrefixHandler(MUSIC_PREFIX, MainMenu, TEXT_MAIN_TITLE, ICON, ART)
 
-    Plugin.AddViewGroup("InfoList", viewMode="InfoList", mediaType="items")
-    Plugin.AddViewGroup("List", viewMode="List", mediaType="items")
+	Plugin.AddViewGroup("InfoList", viewMode="InfoList", mediaType="items")
+	Plugin.AddViewGroup("List", viewMode="List", mediaType="items")
 
-    ## set some defaults so that you don't have to
-    ## pass these parameters to these object types
-    ## every single time
-    MediaContainer.art = R(ART)
-    MediaContainer.title1 = TEXT_TITLE
-    DirectoryItem.thumb = R(ICON_SR)
-    DirectoryItem.summary = TEXT_SUMMARY
-
-
-#### the rest of these are user created functions and
-#### are not reserved by the plugin framework.
-
-#
-# Main menu referenced in the Start() method
-# for the 'Music' prefix handler
-#
+	MediaContainer.art = R(ART)
+	MediaContainer.title1 = TEXT_TITLE
+	DirectoryItem.thumb = R(ICON_SR)
+	DirectoryItem.summary = TEXT_SUMMARY
 
 def MainMenu():
 
-    dir = ObjectContainer(view_group="List")
-    dir.title1 = TEXT_TITLE
-    dir.art = R(ART)
+	dir = ObjectContainer(view_group="List")
+	dir.title1 = TEXT_TITLE
+	dir.art = R(ART)
 
-    #  Add ListenLiveMenu
-    dir.add(DirectoryObject(title=TEXT_LIVE_SHOWS, summary=TEXT_LIVE_SUMMARY, tagline=TEXT_LIVE_TAGLINE, key=Callback(ListenLiveMenu), thumb=R(ICON_DIREKT), art=R(ART)))
+	#  Add ListenLiveMenu
+	dir.add(
+		DirectoryObject(
+			title=TEXT_LIVE_SHOWS, 
+			summary=TEXT_LIVE_SUMMARY, 
+			tagline=TEXT_LIVE_TAGLINE, 
+			key=Callback(ListenLiveMenu), 
+			thumb=R(ICON_DIREKT), 
+			art=R(ART)
+		)
+	)
 
-    #  Add MainPodcastMenu
-    dir.add(DirectoryObject(title=TEXT_POD_MAIN_TITLE, summary=TEXT_POD_DESCRIPTION, tagline=TEXT_POD_MAIN_TAGLINE, key=Callback(MainPodcastMenu), thumb=R(ICON_ARKIV), art=R(ART)))
+	#  Add MainPodcastMenu
+	dir.add(
+		DirectoryObject(
+			title=TEXT_POD_MAIN_TITLE, 
+			summary=TEXT_POD_DESCRIPTION, 
+			tagline=TEXT_POD_MAIN_TAGLINE, 
+			key=Callback(MainPodcastMenu), 
+			thumb=R(ICON_ARKIV), 
+			art=R(ART)
+		)
+	)
 
-    #  Add AllProgramsMenu
-    dir.add(DirectoryObject(title=TEXT_ALL_PROG_TITLE, summary=TEXT_ALL_PROG_SUMMARY, tagline=TEXT_ALL_PROG_TAGLINE, key=Callback(AllProgramsMenu, categoryid=0, categorytitle=TEXT_ALL_PROG_TITLE), thumb=R(ICON_ALLA), art=R(ART)))
+	#  Add AllProgramsMenu
+	dir.add(
+		DirectoryObject(
+			title=TEXT_ALL_PROG_TITLE, 
+			summary=TEXT_ALL_PROG_SUMMARY, 
+			tagline=TEXT_ALL_PROG_TAGLINE, 
+			key=Callback(
+				AllProgramsMenu, 
+				categoryid=0, 
+				categorytitle=TEXT_ALL_PROG_TITLE
+			), 
+			thumb=R(ICON_ALLA), 
+			art=R(ART)
+		)
+	)
 
-    #  Add Categories
-    page = XML.ElementFromURL("http://api.sr.se/api/Poddradio/PoddCategories.aspx", cacheTime=CACHE_TIME_LONG)
+	#  Add Categories
+	page = XML.ElementFromURL("http://api.sr.se/api/Poddradio/PoddCategories.aspx", 
+		cacheTime=CACHE_TIME_LONG)
 
-    for item in page.getiterator('item'):
+	for item in page.getiterator('item'):
    
-        title = item.findtext("title")
-        caticon = R(ICON_SR)
-        if "Barn" in title:
-            caticon = R(ICON_BARN)
-        elif "Dokument" in title:
-            caticon = R(ICON_DOKU)
-        elif "Kultur" in title:
-            caticon = R(ICON_KULT)
-        elif "Livsstil" in title:
-            caticon = R(ICON_LIV1)
-        elif "dning" in title:
-            caticon = R(ICON_LIV2)
-        elif "Musik" in title:
-            caticon = R(ICON_MUSI)
-        elif "Nyheter" in title:
-            caticon = R(ICON_NYHE)
-        elif "Sam" in title:
-            caticon = R(ICON_SAMH)
-        elif "Sport" in title:
-            caticon = R(ICON_SPOR)
-        elif "Spr" in title:
-            caticon = R(ICON_SPRA)
-        elif "Vetenskap" in title:
-            caticon = R(ICON_VETE)
-        else:
-            caticon = R(ICON_SR)
+		title = item.findtext("title")
+		caticon = R(ICON_SR)
+		if "Barn" in title:
+			caticon = R(ICON_BARN)
+		elif "Dokument" in title:
+			caticon = R(ICON_DOKU)
+		elif "Kultur" in title:
+			caticon = R(ICON_KULT)
+		elif "Livsstil" in title:
+			caticon = R(ICON_LIV1)
+		elif "dning" in title:
+			caticon = R(ICON_LIV2)
+		elif "Musik" in title:
+			caticon = R(ICON_MUSI)
+		elif "Nyheter" in title:
+			caticon = R(ICON_NYHE)
+		elif "Sam" in title:
+			caticon = R(ICON_SAMH)
+		elif "Sport" in title:
+			caticon = R(ICON_SPOR)
+		elif "Spr" in title:
+			caticon = R(ICON_SPRA)
+		elif "Vetenskap" in title:
+			caticon = R(ICON_VETE)
+		else:
+			caticon = R(ICON_SR)
         
-        dir.add(DirectoryObject(title=title, key=Callback(AllProgramsMenu, categoryid=int(item.findtext("id", default="0")), categorytitle=title), thumb=caticon,art=R(ART)))        
+	dir.add(
+		DirectoryObject(
+			title=title, 
+			key=Callback(
+				AllProgramsMenu, 
+				categoryid=int(item.findtext("id", default="0")), 
+				categorytitle=title
+			), 
+			thumb=caticon,
+			art=R(ART)
+		)
+	)        
     
-    return dir
+	return dir
 
 def ListenLiveMenu():
 
-    dir = ObjectContainer(view_group = "List", title1=TEXT_TITLE, title2=TEXT_LIVE_SHOWS, art = R(ART_DIREKT))
+	dir = ObjectContainer(
+		view_group = "List", 
+		title1=TEXT_TITLE, 
+		title2=TEXT_LIVE_SHOWS, 
+		art = R(ART_DIREKT)
+	)
 
-    page = XML.ElementFromURL("http://api.sr.se/api/channels/channels.aspx", cacheTime=CACHE_TIME_LONG)
-    rightnow = XML.ElementFromURL("http://api.sr.se/api/rightnowinfo/rightnowinfo.aspx?filterinfo=all", cacheTime=None)
+	page = XML.ElementFromURL("http://api.sr.se/api/channels/channels.aspx", 
+		cacheTime=CACHE_TIME_LONG)
+	rightnow = XML.ElementFromURL("http://api.sr.se/api/rightnowinfo/rightnowinfo.aspx?filterinfo=all", 
+		cacheTime=None)
 
-    for channel in page.getiterator('channel'):
+	for channel in page.getiterator('channel'):
 
-        info = rightnow.find("Channel[@Id='" + channel.attrib.get("id") + "']")
-        desc = ""
-        ch_name = channel.attrib.get("name")
+		info = rightnow.find("Channel[@Id='" + channel.attrib.get("id") + "']")
+		desc = ""
+		ch_name = channel.attrib.get("name")
 
-        ch_thumb = R(ICON_DIREKT)
-        if "P1" in ch_name:
-            ch_thumb = R(ICON_P1)
-        elif "P2" in ch_name:
-            ch_thumb = R(ICON_P2)
-        elif "P3" in ch_name:
-            ch_thumb = R(ICON_P3)
-        elif "P4" in ch_name:
-            ch_thumb = R(ICON_P4)
-        elif "SR Extra" in ch_name:
-            ch_thumb = R(ICON_EXTRA)
-        else:
-            ch_thumb = R(ICON_SR)
+		ch_thumb = R(ICON_DIREKT)
+		if "P1" in ch_name:
+			ch_thumb = R(ICON_P1)
+		elif "P2" in ch_name:
+			ch_thumb = R(ICON_P2)
+		elif "P3" in ch_name:
+			ch_thumb = R(ICON_P3)
+		elif "P4" in ch_name:
+			ch_thumb = R(ICON_P4)
+		elif "SR Extra" in ch_name:
+			ch_thumb = R(ICON_EXTRA)
+		else:
+			ch_thumb = R(ICON_SR)
 
-        if info:
+		if info:
+			if info.findtext("ProgramTitle"):
+				desc += str(info.findtext("ProgramTitle")) + "\n"
+			if info.findtext("ProgramInfo"):
+				desc += str(info.findtext("ProgramInfo")) + "\n\n"
+			else:
+				desc += "\n"
+		else:
+			if info.findtext("Song"):
+				desc += str(info.findtext("Song")) + "\n\n"
+			if info.findtext("NextSong"):
+				desc += TEXT_NEXT_PROGRAM + ":\n" + 
+					str(info.findtext("NextSong")) + "\n\n"
 
-            if info.findtext("ProgramTitle"):
-                desc += str(info.findtext("ProgramTitle")) + "\n"
-                if info.findtext("ProgramInfo"):
-                    desc += str(info.findtext("ProgramInfo")) + "\n\n"
-                else:
-                    desc += "\n"
-            else:
-                if info.findtext("Song"):
-                    desc += str(info.findtext("Song")) + "\n\n"
-                if info.findtext("NextSong"):
-                    desc += TEXT_NEXT_PROGRAM + ":\n" + str(info.findtext("NextSong")) + "\n\n"
+		if info.findtext("NextProgramStartTime"):
+			desc += "\n" + TEXT_NEXT_PROGRAM + ":\n"
+		if info.findtext("NextProgramTitle"):
+			desc += str(info.findtext("NextProgramTitle")) + 
+				" (" + str(info.findtext("NextProgramStartTime")) + ")\n"
+		if info.findtext("NextProgramDescription"):
+			desc += str(info.findtext("NextProgramDescription")) + "\n"
 
-            if info.findtext("NextProgramStartTime"):
-                desc += "\n" + TEXT_NEXT_PROGRAM + ":\n"
-                if info.findtext("NextProgramTitle"):
-                    desc += str(info.findtext("NextProgramTitle")) + " (" + str(info.findtext("NextProgramStartTime")) + ")\n"
-                    if info.findtext("NextProgramDescription"):
-                        desc += str(info.findtext("NextProgramDescription")) + "\n"
+		url = channel.findtext("streamingurl/url[@type='mp3']")
+		Log.Info("live url %s", url)
+		track = TrackObject(
+			title = ch_name, 
+			key =url, 
+			rating_key = MUSIC_PREFIX + "/live/" + ch_name, 
+			thumb = ch_thumb, 
+			art = R(ART_DIREKT)
+		)
 
-        url = channel.findtext("streamingurl/url[@type='mp3']")
-        Log.Info("live url %s", url)
-        track = TrackObject(title = ch_name, key =url, rating_key = MUSIC_PREFIX + "/live/" + ch_name, thumb = ch_thumb, art = R(ART_DIREKT))
+		media = MediaObject(
+			parts = [PartObject(key=Callback(PlayLiveAudio, url=url, ext='mp3'))],
+			container = Container.MP3,
+			audio_codec = AudioCodec.MP3
+		)
 
-	media = MediaObject(
-                parts = [PartObject(key=Callback(PlayLiveAudio, url=url, ext='mp3'))],
-                container = Container.MP3,
-                audio_codec = AudioCodec.MP3
-        )
-
-	track.add(media)
-        dir.add(track)
+		track.add(media)
+		dir.add(track)
 
                 #channel.findtext("streamingurl/url[@type='mp3']"),
                 #ch_name,
                 #subtitle=channel.findtext("tagline"),
                 #summary=desc,
                 #thumb=ch_thumb
-    return dir
+	return dir
 
 def PlayLiveAudio(url):
-    return Redirect(url)
+	return Redirect(url)
 
 def AllProgramsMenu(sender, categoryid, categorytitle):
 
