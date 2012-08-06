@@ -23,11 +23,11 @@ def MainMenu():
 	#  Add ListenLiveMenu
 	dir.add(
 		DirectoryObject(
-			title=TEXT_LIVE_SHOWS, 
-			summary=TEXT_LIVE_SUMMARY, 
-			tagline=TEXT_LIVE_TAGLINE, 
-			key=Callback(ListenLiveMenu), 
-			thumb=R(ICON_DIREKT), 
+			title=TEXT_LIVE_SHOWS,
+			summary=TEXT_LIVE_SUMMARY,
+			tagline=TEXT_LIVE_TAGLINE,
+			key=Callback(ListenLiveMenu),
+			thumb=R(ICON_DIREKT),
 			art=R(ART)
 		)
 	)
@@ -35,11 +35,11 @@ def MainMenu():
 	#  Add MainPodcastMenu
 	dir.add(
 		DirectoryObject(
-			title=TEXT_POD_MAIN_TITLE, 
-			summary=TEXT_POD_DESCRIPTION, 
-			tagline=TEXT_POD_MAIN_TAGLINE, 
-			key=Callback(MainPodcastMenu), 
-			thumb=R(ICON_ARKIV), 
+			title=TEXT_POD_MAIN_TITLE,
+			summary=TEXT_POD_DESCRIPTION,
+			tagline=TEXT_POD_MAIN_TAGLINE,
+			key=Callback(MainPodcastMenu),
+			thumb=R(ICON_ARKIV),
 			art=R(ART)
 		)
 	)
@@ -47,25 +47,25 @@ def MainMenu():
 	#  Add AllProgramsMenu
 	dir.add(
 		DirectoryObject(
-			title=TEXT_ALL_PROG_TITLE, 
-			summary=TEXT_ALL_PROG_SUMMARY, 
-			tagline=TEXT_ALL_PROG_TAGLINE, 
+			title=TEXT_ALL_PROG_TITLE,
+			summary=TEXT_ALL_PROG_SUMMARY,
+			tagline=TEXT_ALL_PROG_TAGLINE,
 			key=Callback(
-				AllProgramsMenu, 
-				categoryid=0, 
+				AllProgramsMenu,
+				categoryid=0,
 				categorytitle=TEXT_ALL_PROG_TITLE
-			), 
-			thumb=R(ICON_ALLA), 
+			),
+			thumb=R(ICON_ALLA),
 			art=R(ART)
 		)
 	)
 
 	#  Add Categories
-	page = XML.ElementFromURL("http://api.sr.se/api/Poddradio/PoddCategories.aspx", 
+	page = XML.ElementFromURL("http://api.sr.se/api/Poddradio/PoddCategories.aspx",
 		cacheTime=CACHE_TIME_LONG)
 
 	for item in page.getiterator('item'):
-   
+
 		title = item.findtext("title")
 		caticon = R(ICON_SR)
 		if "Barn" in title:
@@ -92,34 +92,34 @@ def MainMenu():
 			caticon = R(ICON_VETE)
 		else:
 			caticon = R(ICON_SR)
-        
-	dir.add(
-		DirectoryObject(
-			title=title, 
-			key=Callback(
-				AllProgramsMenu, 
-				categoryid=int(item.findtext("id", default="0")), 
-				categorytitle=title
-			), 
-			thumb=caticon,
-			art=R(ART)
+
+		dir.add(
+			DirectoryObject(
+				title=title,
+				key=Callback(
+					AllProgramsMenu,
+					categoryid=int(item.findtext("id", default="0")),
+					categorytitle=title
+				),
+				thumb=caticon,
+				art=R(ART)
+			)
 		)
-	)        
-    
+
 	return dir
 
 def ListenLiveMenu():
 
 	dir = ObjectContainer(
-		view_group = "List", 
-		title1=TEXT_TITLE, 
-		title2=TEXT_LIVE_SHOWS, 
+		view_group = "List",
+		title1=TEXT_TITLE,
+		title2=TEXT_LIVE_SHOWS,
 		art = R(ART_DIREKT)
 	)
 
-	page = XML.ElementFromURL("http://api.sr.se/api/channels/channels.aspx", 
+	page = XML.ElementFromURL("http://api.sr.se/api/channels/channels.aspx",
 		cacheTime=CACHE_TIME_LONG)
-	rightnow = XML.ElementFromURL("http://api.sr.se/api/rightnowinfo/rightnowinfo.aspx?filterinfo=all", 
+	rightnow = XML.ElementFromURL("http://api.sr.se/api/rightnowinfo/rightnowinfo.aspx?filterinfo=all",
 		cacheTime=None)
 
 	for channel in page.getiterator('channel'):
@@ -144,33 +144,31 @@ def ListenLiveMenu():
 
 		if info:
 			if info.findtext("ProgramTitle"):
-				desc += str(info.findtext("ProgramTitle")) + "\n"
-			if info.findtext("ProgramInfo"):
-				desc += str(info.findtext("ProgramInfo")) + "\n\n"
+				desc += info.findtext("ProgramTitle") + "\n"
+				if info.findtext("ProgramInfo"):
+					desc += info.findtext("ProgramInfo") + "\n\n"
+				else:
+					desc += "\n"
 			else:
-				desc += "\n"
-		else:
-			if info.findtext("Song"):
-				desc += str(info.findtext("Song")) + "\n\n"
-			if info.findtext("NextSong"):
-				desc += TEXT_NEXT_PROGRAM + ":\n" + 
-					str(info.findtext("NextSong")) + "\n\n"
+				if info.findtext("Song"):
+					desc += info.findtext("Song") + "\n\n"
+				if info.findtext("NextSong"):
+					desc += TEXT_NEXT_PROGRAM + ":\n" + info.findtext("NextSong") + "\n\n"
 
-		if info.findtext("NextProgramStartTime"):
-			desc += "\n" + TEXT_NEXT_PROGRAM + ":\n"
-		if info.findtext("NextProgramTitle"):
-			desc += str(info.findtext("NextProgramTitle")) + 
-				" (" + str(info.findtext("NextProgramStartTime")) + ")\n"
-		if info.findtext("NextProgramDescription"):
-			desc += str(info.findtext("NextProgramDescription")) + "\n"
+			if info.findtext("NextProgramStartTime"):
+				desc += "\n" + TEXT_NEXT_PROGRAM + ":\n"
+				if info.findtext("NextProgramTitle"):
+					desc += info.findtext("NextProgramTitle") + " (" + info.findtext("NextProgramStartTime") + ")\n"
+					if info.findtext("NextProgramDescription"):
+						desc += info.findtext("NextProgramDescription") + "\n"
 
 		url = channel.findtext("streamingurl/url[@type='mp3']")
 		Log.Info("live url %s", url)
 		track = TrackObject(
-			title = ch_name, 
-			key =url, 
-			rating_key = MUSIC_PREFIX + "/live/" + ch_name, 
-			thumb = ch_thumb, 
+			title = ch_name,
+			key =url,
+			rating_key = MUSIC_PREFIX + "/live/" + ch_name,
+			thumb = ch_thumb,
 			art = R(ART_DIREKT)
 		)
 
@@ -183,118 +181,120 @@ def ListenLiveMenu():
 		track.add(media)
 		dir.add(track)
 
-                #channel.findtext("streamingurl/url[@type='mp3']"),
-                #ch_name,
-                #subtitle=channel.findtext("tagline"),
-                #summary=desc,
-                #thumb=ch_thumb
 	return dir
 
 def PlayLiveAudio(url):
 	return Redirect(url)
 
-def AllProgramsMenu(sender, categoryid, categorytitle):
+def AllProgramsMenu(categoryid, categorytitle):
 
-    dir = MediaContainer(viewGroup="InfoList")
-    dir.title1 = TEXT_TITLE 
-    dir.title2 = categorytitle
-    dir.art = R(ART)
+	dir = ObjectContainer(
+		view_group = "List",
+		title1 = TEXT_TITLE,
+		title2 = categorytitle,
+		art = R(ART)
+	)
 
-    feedurl = "http://api.sr.se/api/program/programfeed.aspx"
+	feedurl = "http://api.sr.se/api/program/programfeed.aspx"
 
-    if categoryid == 0:
-        feedurl = "http://api.sr.se/api/program/programfeed.aspx"
-    else:
-        feedurl = "http://api.sr.se/api/program/programfeed.aspx?CategoryId=" + str(categoryid)
+	if categoryid == 0:
+		feedurl = "http://api.sr.se/api/program/programfeed.aspx"
+	else:
+		feedurl = "http://api.sr.se/api/program/programfeed.aspx?CategoryId=" + str(categoryid)
 
-    page = XML.ElementFromURL(feedurl, cacheTime=CACHE_TIME_MEDIUM)
+	page = XML.ElementFromURL(feedurl, cacheTime=CACHE_TIME_MEDIUM)
 
-    for item in page.getiterator('item'):
+	for item in page.getiterator('item'):
 
-        hasOndemand = item.find("ondemand").attrib.get("hasOndemand")
-        if hasOndemand == "1":
-        
-            description = str(item.findtext("description"))
-            if item.findtext("broadcastinfo"):
-                description += "\n\n" + str(item.findtext("broadcastinfo"))
+		hasOndemand = item.find("ondemand").attrib.get("hasOndemand")
+		if hasOndemand == "1":
+			description = item.findtext("description")
+			if item.findtext("broadcastinfo"):
+				description += "\n\n" + item.findtext("broadcastinfo")
 
-            unitid = item.findtext("unitid")
-            poddid = "0"
-            podd = item.find("poddunits/podd")
-            if podd is not None:
-                poddid = podd.attrib.get("poddid")
+			unitid = item.findtext("unitid")
+			poddid = "0"
+			podd = item.find("poddunits/podd")
+			if podd is not None:
+				poddid = podd.attrib.get("poddid")
 
-            #  Add ProgramMenu
-            dir.Append(
-                Function(
-                    DirectoryItem(
-                        ProgramMenu,
-                        item.findtext("title"),
-                        subtitle=item.findtext("payoff"),
-                        summary=description,
-                        thumb=R(ICON_SR),
-                        art=R(ART)
-                    ),
-                    poddid=poddid,
-                    unitid=unitid
-                )
-            )
+			#  Add ProgramMenu
+			dir.add(
+				DirectoryObject(
+					title = item.findtext("title"),
+					key = Callback(
+						ProgramMenu,
+						poddid=poddid,
+						unitid=unitid
+					),
+					tagline=item.findtext("payoff"),
+					summary=description,
+					thumb=R(ICON_SR),
+					art=R(ART)
+				)
+			)
 
-    # ... and then return the container
-    return dir
+	return dir
 
 
-def ProgramMenu(sender, poddid, unitid):
+def ProgramMenu(poddid, unitid):
 
-    feedurl = "http://api.sr.se/api/program/broadcastfeed.aspx?unitid=" + unitid
+	feedurl = "http://api.sr.se/api/program/broadcastfeed.aspx?unitid=" + unitid
 
-    page = XML.ElementFromURL(feedurl, cacheTime=CACHE_TIME_SHORT)
+	page = XML.ElementFromURL(feedurl, cacheTime=CACHE_TIME_SHORT)
 
-    dir = MediaContainer(viewGroup="InfoList")
-    dir.title1 = TEXT_TITLE 
-    dir.title2 = page.findtext("title")
-    dir.art = R(ART)
+	dir = ObjectContainer(
+		view_group="InfoList",
+		title1 = TEXT_TITLE,
+		title2 = page.findtext("title"),
+		art = R(ART)
+	)
 
-    channellogo = R(ICON_SR)
-    baseurl = page.xpath("//urlset/url[@type='m4a' and @protocol='http' and @quality='normal' and @name='LatestBroadcast']/text()")[0]
+	channellogo = R(ICON_SR)
+	baseurl = page.xpath("//urlset/url[@type='m4a' and @protocol='http' and @quality='normal' and @name='LatestBroadcast']/text()")[0]
 
-    for item in page.getiterator('item'):
+	for item in page.getiterator('item'):
 
-        broadcastid = item.find("ondemand").attrib.get("mainbroadcastid")
-        itemlink = baseurl.replace("[broadcastid]", broadcastid)
-        itemtitle = item.find("ondemand").attrib.get("mainbroadcasttitle")
-        itemsubtitle = item.find("ondemand").attrib.get("mainbroadcastdate")
-        itemsummary = item.find("ondemand").attrib.get("mainbroadcastdescription")
+		broadcastid = item.find("ondemand").attrib.get("mainbroadcastid")
+		itemlink = baseurl.replace("[broadcastid]", broadcastid)
+		itemtitle = item.find("ondemand").attrib.get("mainbroadcasttitle")
+		itemsubtitle = item.find("ondemand").attrib.get("mainbroadcastdate")
+		itemsummary = item.find("ondemand").attrib.get("mainbroadcastdescription")
+		Log.Info("itemlink %s", itemlink)
+		track = TrackObject(
+			title = itemtitle,
+			key = itemlink,
+			rating_key = MUSIC_PREFIX + itemtitle,
+			thumb=channellogo
+		)
+		media = MediaObject(
+			parts = [PartObject(key=itemlink)],
+			audio_codec = AudioCodec.MP3
+		)
+		track.add(media)
+		dir.add(track)
 
-        dir.Append(
-            TrackItem(
-                itemlink,
-                itemtitle,
-                subtitle=itemsubtitle,
-                summary=itemsummary,
-                thumb=channellogo
-            )
-        )
+                #subtitle=itemsubtitle,
+                #summary=itemsummary,
 
-    #  Append PodcastMenu if one exists
-    if poddid != "0":
-        dir.Append(
-            Function(
-                DirectoryItem(
-                    PodcastMenu,
-                    TEXT_POD_ITEM_TITLE,
-	            subtitle=TEXT_POD_ITEM_TAGLINE,
-	            summary=TEXT_POD_DESCRIPTION,
-	            thumb=R(ICON_ARKIV),
-	            art=R(ART)
-	        ),
-	        poddid=poddid,
-	        unitid=unitid
-            )
-        )
+	#  Append PodcastMenu if one exists
+	if poddid != "0":
+		dir.add(
+			DirectoryObject(
+				title=TEXT_POD_ITEM_TITLE,
+				key=Callback(
+					PodcastMenu,
+					poddid=poddid,
+					unitid=unitid
+				),
+				tagline=TEXT_POD_ITEM_TAGLINE,
+				summary=TEXT_POD_DESCRIPTION,
+				thumb=R(ICON_ARKIV),
+				art=R(ART)
+			)
+		)
 
-    # ... and then return the container
-    return dir
+	return dir
 
 def MainPodcastMenu(sender):
 
