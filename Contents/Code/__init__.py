@@ -32,6 +32,18 @@ def MainMenu():
 		)
 	)
 
+	#  Add MainProgramsMenu
+	dir.add(
+		DirectoryObject(
+			title=TEXT_PROGRAMS,
+			key=Callback(
+				MainProgramsMenu
+			),
+			thumb=R(ICON_ALLA),
+			art=R(ART)
+		)
+	)
+
 	#  Add MainPodcastMenu
 	dir.add(
 		DirectoryObject(
@@ -43,68 +55,6 @@ def MainMenu():
 			art=R(ART)
 		)
 	)
-
-	#  Add AllProgramsMenu
-	dir.add(
-		DirectoryObject(
-			title=TEXT_ALL_PROG_TITLE,
-			summary=TEXT_ALL_PROG_SUMMARY,
-			tagline=TEXT_ALL_PROG_TAGLINE,
-			key=Callback(
-				AllProgramsMenu,
-				categoryid=0,
-				categorytitle=TEXT_ALL_PROG_TITLE
-			),
-			thumb=R(ICON_ALLA),
-			art=R(ART)
-		)
-	)
-
-	#  Add Categories
-	page = XML.ElementFromURL("http://api.sr.se/api/Poddradio/PoddCategories.aspx",
-		cacheTime=CACHE_TIME_LONG)
-
-	for item in page.getiterator('item'):
-
-		title = item.findtext("title")
-		caticon = R(ICON_SR)
-		if "Barn" in title:
-			caticon = R(ICON_BARN)
-		elif "Dokument" in title:
-			caticon = R(ICON_DOKU)
-		elif "Kultur" in title:
-			caticon = R(ICON_KULT)
-		elif "Livsstil" in title:
-			caticon = R(ICON_LIV1)
-		elif "dning" in title:
-			caticon = R(ICON_LIV2)
-		elif "Musik" in title:
-			caticon = R(ICON_MUSI)
-		elif "Nyheter" in title:
-			caticon = R(ICON_NYHE)
-		elif "Sam" in title:
-			caticon = R(ICON_SAMH)
-		elif "Sport" in title:
-			caticon = R(ICON_SPOR)
-		elif "Spr" in title:
-			caticon = R(ICON_SPRA)
-		elif "Vetenskap" in title:
-			caticon = R(ICON_VETE)
-		else:
-			caticon = R(ICON_SR)
-
-		dir.add(
-			DirectoryObject(
-				title=title,
-				key=Callback(
-					AllProgramsMenu,
-					categoryid=int(item.findtext("id", default="0")),
-					categorytitle=title
-				),
-				thumb=caticon,
-				art=R(ART)
-			)
-		)
 
 	return dir
 
@@ -185,6 +135,77 @@ def ListenLiveMenu():
 
 def PlayLiveAudio(url):
 	return Redirect(url)
+
+def MainProgramsMenu():
+	dir = ObjectContainer(
+		view_group = "List",
+		title1=TEXT_TITLE,
+		title2=TEXT_PROGRAMS,
+		art = R(ART_DIREKT)
+	)
+
+	dir.add(
+		DirectoryObject(
+			title=TEXT_ALL_PROG_TITLE,
+			summary=TEXT_ALL_PROG_SUMMARY,
+			tagline=TEXT_ALL_PROG_TAGLINE,
+			key=Callback(
+				AllProgramsMenu,
+				categoryid=0,
+				categorytitle=TEXT_ALL_PROG_TITLE
+			),
+			thumb=R(ICON_ALLA),
+			art=R(ART)
+		)
+	)
+
+	#  Add Categories
+	page = XML.ElementFromURL("http://api.sr.se/api/Poddradio/PoddCategories.aspx",
+		cacheTime=CACHE_TIME_LONG)
+
+	for item in page.getiterator('item'):
+
+		title = item.findtext("title")
+		caticon = R(ICON_SR)
+		if "Barn" in title:
+			caticon = R(ICON_BARN)
+		elif "Dokument" in title:
+			caticon = R(ICON_DOKU)
+		elif "Kultur" in title:
+			caticon = R(ICON_KULT)
+		elif "Livsstil" in title:
+			caticon = R(ICON_LIV1)
+		elif "dning" in title:
+			caticon = R(ICON_LIV2)
+		elif "Musik" in title:
+			caticon = R(ICON_MUSI)
+		elif "Nyheter" in title:
+			caticon = R(ICON_NYHE)
+		elif "Sam" in title:
+			caticon = R(ICON_SAMH)
+		elif "Sport" in title:
+			caticon = R(ICON_SPOR)
+		elif "Spr" in title:
+			caticon = R(ICON_SPRA)
+		elif "Vetenskap" in title:
+			caticon = R(ICON_VETE)
+		else:
+			caticon = R(ICON_SR)
+
+		dir.add(
+			DirectoryObject(
+				title=title,
+				key=Callback(
+					AllProgramsMenu,
+					categoryid=int(item.findtext("id", default="0")),
+					categorytitle=title
+				),
+				thumb=caticon,
+				art=R(ART)
+			)
+		)
+	return dir
+
 
 def AllProgramsMenu(categoryid, categorytitle):
 
