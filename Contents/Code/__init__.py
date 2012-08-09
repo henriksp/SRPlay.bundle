@@ -296,141 +296,151 @@ def ProgramMenu(poddid, unitid):
 
 	return dir
 
-def MainPodcastMenu(sender):
+def MainPodcastMenu():
 
-    dir = MediaContainer(viewGroup="List")
-    dir.title1 = TEXT_POD_TITLE
-    dir.art = R(ART_POD)
+	dir = ObjectContainer(
+		view_group = "List",
+		title1 = TEXT_POD_TITLE,
+		art = R(ART_POD)
+	)
 
-    #  Add AllPodcastsMenu
-    dir.Append(
-        Function(
-            DirectoryItem(
-                AllPodcastsMenu,
-                TEXT_ALL_PROG_TITLE,
-                subtitle=TEXT_ALL_PROG_TAGLINE,
-                summary=TEXT_ALL_PROG_SUMMARY,
-                thumb=R(ICON_ALLA_POD),
-                art=R(ART_POD)
-            ),
-            categoryid=0,
-            categorytitle=TEXT_ALL_PROG_TITLE
-        )
-    )
+	#  Add AllPodcastsMenu
+	dir.add(
+		DirectoryObject(
+			title=TEXT_ALL_PROG_TITLE,
+			key=Callback(
+				AllPodcastsMenu,
+				categoryid=0,
+				categorytitle=TEXT_ALL_PROG_TITLE
+			),
+			tagline=TEXT_ALL_PROG_TAGLINE,
+			summary=TEXT_ALL_PROG_SUMMARY,
+			thumb=R(ICON_ALLA_POD),
+			art=R(ART_POD)
+		)
+	)
 
-    #  Add Podcast Categories
-    page = XML.ElementFromURL("http://api.sr.se/api/Poddradio/PoddCategories.aspx", cacheTime=CACHE_TIME_LONG)
+	#  Add Podcast Categories
+	page = XML.ElementFromURL("http://api.sr.se/api/Poddradio/PoddCategories.aspx", cacheTime=CACHE_TIME_LONG)
 
-    for item in page.getiterator('item'):
-   
-        title = item.findtext("title")
-        caticon = R(ICON_SR_POD)
-        if "Barn" in title:
-            caticon = R(ICON_BARN_POD)
-        elif "Dokument" in title:
-            caticon = R(ICON_DOKU_POD)
-        elif "Kultur" in title:
-            caticon = R(ICON_KULT_POD)
-        elif "Livsstil" in title:
-            caticon = R(ICON_LIV1_POD)
-        elif "dning" in title:
-            caticon = R(ICON_LIV2_POD)
-        elif "Musik" in title:
-            caticon = R(ICON_MUSI_POD)
-        elif "Nyheter" in title:
-            caticon = R(ICON_NYHE_POD)
-        elif "Sam" in title:
-            caticon = R(ICON_SAMH_POD)
-        elif "Sport" in title:
-            caticon = R(ICON_SPOR_POD)
-        elif "Spr" in title:
-            caticon = R(ICON_SPRA_POD)
-        elif "Vetenskap" in title:
-            caticon = R(ICON_VETE_POD)
-        else:
-            caticon = R(ICON_SR_POD)
-        
-        dir.Append(
-            Function(
-                DirectoryItem(
-                    AllPodcastsMenu,
-                    title,
-                    subtitle="",
-                    summary="",
-                    thumb=caticon,
-                    art=R(ART_POD)
-                ),
-                categoryid=int(item.findtext("id", default="0")),
-                categorytitle=title
-            )
-        )
+	for item in page.getiterator('item'):
+
+		title = item.findtext("title")
+		caticon = R(ICON_SR_POD)
+		if "Barn" in title:
+			caticon = R(ICON_BARN_POD)
+		elif "Dokument" in title:
+			caticon = R(ICON_DOKU_POD)
+		elif "Kultur" in title:
+			caticon = R(ICON_KULT_POD)
+		elif "Livsstil" in title:
+			caticon = R(ICON_LIV1_POD)
+		elif "dning" in title:
+			caticon = R(ICON_LIV2_POD)
+		elif "Musik" in title:
+			caticon = R(ICON_MUSI_POD)
+		elif "Nyheter" in title:
+			caticon = R(ICON_NYHE_POD)
+		elif "Sam" in title:
+			caticon = R(ICON_SAMH_POD)
+		elif "Sport" in title:
+			caticon = R(ICON_SPOR_POD)
+		elif "Spr" in title:
+			caticon = R(ICON_SPRA_POD)
+		elif "Vetenskap" in title:
+			caticon = R(ICON_VETE_POD)
+		else:
+			caticon = R(ICON_SR_POD)
+
+		dir.add(
+			DirectoryObject(
+				title=title,
+				key=Callback(
+					AllPodcastsMenu,
+					categoryid=int(item.findtext("id", default="0")),
+					categorytitle=title
+				),
+				tagline="",
+				summary="",
+				thumb=caticon,
+				art=R(ART_POD)
+			)
+		)
 
 
-    # ... and then return the container
-    return dir
+	return dir
 
-def AllPodcastsMenu(sender, categoryid, categorytitle):
+def AllPodcastsMenu(categoryid, categorytitle):
 
-    dir = MediaContainer(viewGroup="InfoList")
-    dir.title1 = TEXT_POD_TITLE 
-    dir.title2 = categorytitle
-    dir.art = R(ART_POD)
+	dir = ObjectContainer(
+		view_group = "List",
+		title1=TEXT_POD_TITLE,
+		title2=categorytitle,
+		art = R(ART_POD)
+	)
 
-    feedurl = "http://api.sr.se/api/Poddradio/PoddFeed.aspx"
+	feedurl = "http://api.sr.se/api/Poddradio/PoddFeed.aspx"
 
-    if categoryid == 0:
-        feedurl = "http://api.sr.se/api/Poddradio/PoddFeed.aspx"
-    else:
-        feedurl = "http://api.sr.se/api/Poddradio/PoddFeed.aspx?CategoryId=" + str(categoryid) 
+	if categoryid == 0:
+		feedurl = "http://api.sr.se/api/Poddradio/PoddFeed.aspx"
+	else:
+		feedurl = "http://api.sr.se/api/Poddradio/PoddFeed.aspx?CategoryId=" + str(categoryid)
 
-    page = XML.ElementFromURL(feedurl, cacheTime=CACHE_TIME_MEDIUM)
+	page = XML.ElementFromURL(feedurl, cacheTime=CACHE_TIME_MEDIUM)
 
-    for item in page.getiterator('item'):
+	for item in page.getiterator('item'):
 
-        #  Add PodcastMenu
-        dir.Append(
-            Function(
-                DirectoryItem(
-                    PodcastMenu,
-                    item.findtext("title"),
-                    subtitle=item.findtext("unit"),
-                    summary=item.findtext("description"),
-                    thumb=R(ICON_SR_POD),
-                    art=R(ART_POD)
-                ),
-                poddid=item.findtext("poddid"),
-                unitid=item.findtext("unitid")
-            )
-        )
+		#  Add PodcastMenu
+		dir.add(
+			DirectoryObject(
+				title=item.findtext("title"),
+				key=Callback(
+					PodcastMenu,
+					poddid=item.findtext("poddid"),
+					unitid=item.findtext("unitid")
+				),
+				tagline=item.findtext("unit"),
+				summary=item.findtext("description"),
+				thumb=R(ICON_SR_POD),
+				art=R(ART_POD)
+			)
+		)
 
-    # ... and then return the container
-    return dir
+	return dir
 
-def PodcastMenu(sender, poddid, unitid):
+def PodcastMenu(poddid, unitid):
 
-    poddurl = "http://api.sr.se/api/rssfeed/rssfeed.aspx?Poddfeed=" + poddid
+	poddurl = "http://api.sr.se/api/rssfeed/rssfeed.aspx?Poddfeed=" + poddid
 
-    page = XML.ElementFromURL(poddurl, cacheTime=CACHE_TIME_SHORT)
+	page = XML.ElementFromURL(poddurl, cacheTime=CACHE_TIME_SHORT)
 
-    dir = MediaContainer(viewGroup="InfoList")
-    dir.title1 = TEXT_POD_TITLE 
-    dir.title2 = page.findtext("channel/title")
-    dir.art = R(ART_POD)
+	dir = ObjectContainer(
+		view_group = "List",
+		title1=TEXT_POD_TITLE,
+		title2=page.findtext("channel/title"),
+		art = R(ART_POD)
+	)
 
-    channellogo = page.xpath('//itunes:image', namespaces=ITUNES_NAMESPACE)[0].get('href')
+	channellogo = page.xpath('//itunes:image', namespaces=ITUNES_NAMESPACE)[0].get('href')
 
-    for item in page.getiterator('item'):
+	for item in page.getiterator('item'):
 
-        dir.Append(
-            TrackItem(
-                item.findtext("link"),
-                item.findtext("title"),
-                subtitle=item.findtext("pubDate"),
-                summary=item.findtext("description"),
-                duration=int(item.find("enclosure").attrib.get("length")) * 8 / 128,
-                thumb=channellogo
-            )
-        )
+		track = TrackObject(
+			title = item.findtext("title"),
+			key = item.findtext("link"),
+			rating_key = MUSIC_PREFIX + item.findtext("title"),
+			thumb=channellogo
+		)
+		media = MediaObject(
+			parts = [PartObject(key = item.findtext("link"))],
+			audio_codec = AudioCodec.MP3,
+			duration=int(item.find("enclosure").attrib.get("length")) * 8 / 128
+		)
+		track.add(media)
+		dir.add(track)
+#				subtitle=item.findtext("pubDate"),
+#				summary=item.findtext("description"),
 
-    # ... and then return the container
-    return dir
+	return dir
+
+# End of file
