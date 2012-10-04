@@ -281,17 +281,26 @@ def ProgramMenu(poddid, unitid):
 		itemtitle = item.find("ondemand").attrib.get("mainbroadcasttitle")
 		itemsubtitle = item.find("ondemand").attrib.get("mainbroadcastdate")
 		itemsummary = item.find("ondemand").attrib.get("mainbroadcastdescription")
+		duration = int(item.find("ondemand").attrib.get("totalduration")) * 1000
 		Log.Info("itemlink %s", itemlink)
+		Log.Info("duration %d", duration)
 		track = TrackObject(
 			title = itemtitle,
 			key = itemlink,
-			rating_key = MUSIC_PREFIX + itemtitle,
-			thumb=channellogo
+			rating_key = MUSIC_PREFIX + "/" + unitid + "/" + broadcastid,
+			thumb=channellogo,
+			duration = duration
 		)
 		media = MediaObject(
-			parts = [PartObject(key=itemlink)],
-			audio_codec = AudioCodec.MP3
+			audio_codec = AudioCodec.MP3,
+			duration = duration
 		)
+		for brfile in item.getiterator('broadcastfilename'):
+			brid = brfile.attrib.get("broadcastid")
+			brdur = int(brfile.attrib.get("duration")) * 1000
+			brlink = baseurl.replace("[broadcastid]",brid)
+			Log.Info("brlink %s dur %d", brlink, brdur)
+			media.add(PartObject(key=brlink, duration=brdur))
 		track.add(media)
 		dir.add(track)
 
