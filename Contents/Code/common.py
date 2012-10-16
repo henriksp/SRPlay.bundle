@@ -3,6 +3,9 @@
 # Global constants
 MUSIC_PREFIX = "/music/sverigesradioplay"
 
+BASE_URL      = "http://beta.sr.se/api/v2"
+CATEGORY_URL  = BASE_URL + "/programcategories?pagination=false"
+
 ART           = 'art-default.jpg'
 ART_DIREKT    = 'art-direkt.jpg'
 ART_POD       = 'art-pod.jpg'
@@ -55,7 +58,7 @@ TEXT_LIVE_SHOWS = u'Livesändningar'
 TEXT_LIVE_TITLE = u'Direktsänt'
 TEXT_LIVE_TAGLINE = u''
 TEXT_LIVE_SUMMARY = u''
-TEXT_PROGRAMS = u'Sändningsarkiv'
+TEXT_PROGRAMS = u'Program'
 TEXT_ALL_PROG_TITLE = u'Alla program A-Ö'
 TEXT_ALL_PROG_TAGLINE = u''
 TEXT_ALL_PROG_SUMMARY = u''

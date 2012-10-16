@@ -32,26 +32,14 @@ def MainMenu():
 		)
 	)
 
-	#  Add MainProgramsMenu
+	#  Add ProgramsMenu
 	dir.add(
 		DirectoryObject(
 			title=TEXT_PROGRAMS,
 			key=Callback(
-				MainProgramsMenu
+				ProgramsMenu
 			),
 			thumb=R(ICON_ALLA),
-			art=R(ART)
-		)
-	)
-
-	#  Add MainPodcastMenu
-	dir.add(
-		DirectoryObject(
-			title=TEXT_POD_MAIN_TITLE,
-			summary=TEXT_POD_DESCRIPTION,
-			tagline=TEXT_POD_MAIN_TAGLINE,
-			key=Callback(MainPodcastMenu),
-			thumb=R(ICON_ARKIV),
 			art=R(ART)
 		)
 	)
@@ -136,7 +124,7 @@ def ListenLiveMenu():
 def PlayLiveAudio(url):
 	return Redirect(url)
 
-def MainProgramsMenu():
+def ProgramsMenu():
 	dir = ObjectContainer(
 		view_group = "List",
 		title1=TEXT_TITLE,
@@ -150,7 +138,7 @@ def MainProgramsMenu():
 			summary=TEXT_ALL_PROG_SUMMARY,
 			tagline=TEXT_ALL_PROG_TAGLINE,
 			key=Callback(
-				AllProgramsMenu,
+				CategoryMenu,
 				categoryid=0,
 				categorytitle=TEXT_ALL_PROG_TITLE
 			),
@@ -160,45 +148,45 @@ def MainProgramsMenu():
 	)
 
 	#  Add Categories
-	page = XML.ElementFromURL("http://api.sr.se/api/Poddradio/PoddCategories.aspx",
+	page = XML.ElementFromURL(CATEGORY_URL,
 		cacheTime=CACHE_TIME_LONG)
 
-	for item in page.getiterator('item'):
+	for item in page.getiterator('programcategory'):
 
-		title = item.findtext("title")
+		name = item.attrib.get("name")
 		caticon = R(ICON_SR)
-		if "Barn" in title:
+		if "Barn" in name:
 			caticon = R(ICON_BARN)
-		elif "Dokument" in title:
+		elif "Dokument" in name:
 			caticon = R(ICON_DOKU)
-		elif "Kultur" in title:
+		elif "Kultur" in name:
 			caticon = R(ICON_KULT)
-		elif "Livsstil" in title:
+		elif "Livsstil" in name:
 			caticon = R(ICON_LIV1)
-		elif "dning" in title:
+		elif "dning" in name:
 			caticon = R(ICON_LIV2)
-		elif "Musik" in title:
+		elif "Musik" in name:
 			caticon = R(ICON_MUSI)
-		elif "Nyheter" in title:
+		elif "Nyheter" in name:
 			caticon = R(ICON_NYHE)
-		elif "Sam" in title:
+		elif "Sam" in name:
 			caticon = R(ICON_SAMH)
-		elif "Sport" in title:
+		elif "Sport" in name:
 			caticon = R(ICON_SPOR)
-		elif "Spr" in title:
+		elif "Spr" in name:
 			caticon = R(ICON_SPRA)
-		elif "Vetenskap" in title:
+		elif "Vetenskap" in name:
 			caticon = R(ICON_VETE)
 		else:
 			caticon = R(ICON_SR)
 
 		dir.add(
 			DirectoryObject(
-				title=title,
+				title=name,
 				key=Callback(
-					AllProgramsMenu,
-					categoryid=int(item.findtext("id", default="0")),
-					categorytitle=title
+					CategoryMenu,
+					categoryid=int(item.attrib.get("id", default="0")),
+					categorytitle=name
 				),
 				thumb=caticon,
 				art=R(ART)
@@ -207,7 +195,7 @@ def MainProgramsMenu():
 	return dir
 
 
-def AllProgramsMenu(categoryid, categorytitle):
+def CategoryMenu(categoryid, categorytitle):
 
 	dir = ObjectContainer(
 		view_group = "List",
@@ -300,7 +288,8 @@ def ProgramMenu(poddid, unitid):
 			brdur = int(brfile.attrib.get("duration")) * 1000
 			brlink = baseurl.replace("[broadcastid]",brid)
 			Log.Info("brlink %s dur %d", brlink, brdur)
-			media.add(PartObject(key=brlink, duration=brdur))
+			media.add(PartObject(key=Callback(PlayLiveAudio, url=brlink)))
+			# media.add(PartObject(key=brlink, duration=brdur))
 		track.add(media)
 		dir.add(track)
 
