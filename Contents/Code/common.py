@@ -3,9 +3,19 @@
 # Global constants
 MUSIC_PREFIX = "/music/sverigesradioplay"
 
-BASE_URL      = "http://beta.sr.se/api/v2"
-CATEGORY_URL  = BASE_URL + "/programcategories?pagination=false"
+# URLs
+BASE_URL      = "http://beta.sr.se/api/v2/"
+CATEGORY_URL  = BASE_URL + "programcategories?pagination=false"
+CHANNEL_URL   = BASE_URL + "channels?pagination=false"
+CHANNELTYPE_URL = CHANNEL_URL + "&filter=channel.channeltype&filtervalue="
+RIGHTNOW_URL = BASE_URL + "scheduledepisodes/rightnow?channelid="
+PROGRAMS_URL  = BASE_URL + "programs?pagination=false"
+PROGRAMS_CATEGORY_URL = BASE_URL + "programs/index?pagination=false&programcategoryid="
+PROGRAM_URL   = BASE_URL + "programs/"
+POD_URL = BASE_URL + "podfiles?pagination=false&programid="
+BROADCAST_URL = BASE_URL + "broadcasts?pagination=false&programid="
 
+# Art & Icons
 ART           = 'art-default.jpg'
 ART_DIREKT    = 'art-direkt.jpg'
 ART_POD       = 'art-pod.jpg'
@@ -24,28 +34,10 @@ ICON_SAMH     = 'c-samh.png'
 ICON_SPOR     = 'c-spor.png'
 ICON_SPRA     = 'c-spra.png'
 ICON_VETE     = 'c-vete.png'
-ICON_P1       = 'logo-p1.png'
-ICON_P2       = 'logo-p2.png'
-ICON_P3       = 'logo-p3.png'
-ICON_P4       = 'logo-p4.png'
 ICON_SR       = 'logo-sr.png'
 ICON_EXTRA    = 'logo-sr-ext.png'
-ICON_ALLA_POD = 'c-alla-pod.png'
-ICON_BARN_POD = 'c-barn-pod.png'
-ICON_DOKU_POD = 'c-doku-pod.png'
-ICON_KULT_POD = 'c-kult-pod.png'
-ICON_LIV1_POD = 'c-liv1-pod.png'
-ICON_LIV2_POD = 'c-liv2-pod.png'
-ICON_MUSI_POD = 'c-musi-pod.png'
-ICON_NYHE_POD = 'c-nyhe-pod.png'
-ICON_SAMH_POD = 'c-samh-pod.png'
-ICON_SPOR_POD = 'c-spor-pod.png'
-ICON_SPRA_POD = 'c-spra-pod.png'
-ICON_VETE_POD = 'c-vete-pod.png'
-ICON_SR_POD   = 'logo-sr-pod.png'
 
-ITUNES_NAMESPACE = {'itunes':'http://www.itunes.com/dtds/podcast-1.0.dtd'}
-
+# http cache times
 CACHE_TIME_LONG    = 60*60*24 # 1 day
 CACHE_TIME_MEDIUM  = 60*60    # 1 hour
 CACHE_TIME_SHORT   = 60*5     # 5 minutes
@@ -55,19 +47,14 @@ TEXT_TITLE = u'Sveriges Radio Play'
 TEXT_SUMMARY = u'The Swedish Radio website continually streams over 40 radio channels, including our four national FM stations and some ten web-only channels. All programmes are available archived and on demand 24 hours a day for 30 days following the original FM broadcast.'
 TEXT_MAIN_TITLE = u'Sveriges Radio Play'
 TEXT_LIVE_SHOWS = u'Livesändningar'
-TEXT_LIVE_TITLE = u'Direktsänt'
 TEXT_LIVE_TAGLINE = u''
 TEXT_LIVE_SUMMARY = u''
 TEXT_PROGRAMS = u'Program'
 TEXT_ALL_PROG_TITLE = u'Alla program A-Ö'
 TEXT_ALL_PROG_TAGLINE = u''
 TEXT_ALL_PROG_SUMMARY = u''
-TEXT_NEXT_PROGRAM = u'NÄSTA'
-TEXT_POD_TITLE = u'Sveriges Radio Poddarkiv'
-TEXT_POD_MAIN_TITLE = u'Poddarkiv'
-TEXT_POD_MAIN_TAGLINE = u'Öppna poddarkivet'
-TEXT_POD_ITEM_TITLE = u'Fler avsnitt i poddarkivet...'
-TEXT_POD_ITEM_TAGLINE = u'Visa alla avsnitt i poddarkivet'
-TEXT_POD_DESCRIPTION = u'Poddarkivet är poddavsnitten som alltid funnits med i Sveriges Radio Play. De innehåller inte musik, men de finns kvar för evigt. Program som Sommar i P1 sänds inte hela året. De har ett sändningsarkiv under säsongen de sänds i radio, medan poddarkivet finns tillgängligt året om.'
+TEXT_NEXT_PROGRAM = u'Nästa'
+TEXT_POD_TITLE = u'Poddarkiv'
+TEXT_BROADCAST_TITLE = u'Sändningsarkiv'
 
 # End of file
