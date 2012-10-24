@@ -2,6 +2,8 @@
 
 from common import *
 from sets import Set
+import httplib
+import urlparse
 
 def Start():
 
@@ -102,6 +104,13 @@ def ListenLiveChannelType(channelType):
 			fullName = channelName
 
 		url = channel.xpath("liveaudio/url/text()")[0]
+
+		# SR uses redirect so lets get the actual url
+		parsedUrl = urlparse.urlparse(url)
+		httpCon = httplib.HTTPConnection(parsedUrl.netloc)
+		httpCon.request('HEAD', parsedUrl.path)
+		httpRes = httpCon.getresponse()
+		url = httpRes.getheader("location")
 
 		# No image provided for extra channels
 		# Use own included
