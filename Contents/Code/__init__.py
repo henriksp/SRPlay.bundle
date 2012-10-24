@@ -60,7 +60,6 @@ def ListenLiveMenu():
 
 	page = XML.ElementFromURL(CHANNEL_URL, cacheTime=CACHE_TIME_LONG)
 	channeltypes = page.xpath("//channeltype/text()")
-	Log.Info("types string %s", channeltypes)
 	typeSet = Set()
 	for i in range(len(channeltypes)):
 		if channeltypes[i] not in typeSet:
@@ -86,10 +85,8 @@ def ListenLiveChannelType(channelType):
 		title2=channelType,
 		art = R(ART_DIREKT)
 	)
-	Log.Info("page base url %s", CHANNELTYPE_URL + channelType)
 	pageurl = CHANNELTYPE_URL + channelType
 	pageurl = pageurl.replace(" ", "+")
-	Log.Info("page url %s", pageurl)
 	page = XML.ElementFromURL(pageurl, cacheTime=CACHE_TIME_LONG)
 
 	for channel in page.getiterator('channel'):
@@ -129,7 +126,6 @@ def ListenLiveChannelType(channelType):
 #		if nextProgram:
 #			description += TEXT_NEXT_PROGRAM+ ": " + nextProgram[0]
 
-		Log.Info("live url %s", url)
 		track = TrackObject(
 			title = fullName,
 			summary = description,
@@ -331,7 +327,7 @@ def ProgramPods(progId, progName, progImage):
 		title = progFile.findtext("title")
 		duration = int(progFile.findtext("duration"))
 		filesize = int(progFile.findtext("filesizeinbytes"))
-		Log.Info(" dur %d, filesize %d", duration, filesize)
+
 		# SR API Bug
 		# Some podcasts have incorrect duration
 		# Use filesize to calculate duration
@@ -342,7 +338,6 @@ def ProgramPods(progId, progName, progImage):
 			duration = filesize / 12000
 
 		duration = duration * 1000
-		Log.Info("duration %d", duration)
 		description = progFile.findtext("description")
 		key = progFile.findtext("statkey")
 		url = progFile.findtext("url")
