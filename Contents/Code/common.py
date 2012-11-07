@@ -4,7 +4,7 @@
 MUSIC_PREFIX = "/music/sverigesradioplay"
 
 # URLs
-BASE_URL      = "http://beta.sr.se/api/v2/"
+BASE_URL      = "http://sverigesradio.se/api/v2/"
 CATEGORY_URL  = BASE_URL + "programcategories?pagination=false"
 CHANNEL_URL   = BASE_URL + "channels?pagination=false"
 CHANNELTYPE_URL = CHANNEL_URL + "&filter=channel.channeltype&filtervalue="
