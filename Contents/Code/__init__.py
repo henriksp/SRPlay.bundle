@@ -1,405 +1,443 @@
 # -*- coding: utf-8 -*-
-
 from common import *
-from sets import Set
-import httplib
-import urlparse
 
+##########################################################################################
 def Start():
+    ObjectContainer.title1 = TEXT_TITLE
+    ObjectContainer.art = R(ART)
+    
+    DirectoryItem.thumb = R(ICON_SR)
+    DirectoryItem.summary = TEXT_SUMMARY
 
-	Plugin.AddPrefixHandler(MUSIC_PREFIX, MainMenu, TEXT_MAIN_TITLE, ICON, ART)
-
-	Plugin.AddViewGroup("InfoList", viewMode="InfoList", mediaType="items")
-	Plugin.AddViewGroup("List", viewMode="List", mediaType="items")
-
-	MediaContainer.art = R(ART)
-	MediaContainer.title1 = TEXT_TITLE
-	DirectoryItem.thumb = R(ICON_SR)
-	DirectoryItem.summary = TEXT_SUMMARY
-
+##########################################################################################
+@handler(PREFIX, TEXT_TITLE, thumb = ICON_SR, art = ART)
 def MainMenu():
+    oc = ObjectContainer()
 
-	dir = ObjectContainer(view_group="List")
-	dir.title1 = TEXT_TITLE
-	dir.art = R(ART)
+    #  Add ListenLiveMenu
+    oc.add(
+        DirectoryObject(
+            title = TEXT_LIVE_SHOWS,
+            summary = TEXT_LIVE_SUMMARY,
+            tagline = TEXT_LIVE_TAGLINE,
+            key = Callback(ListenLiveMenu),
+            thumb = R(ICON_DIREKT),
+            art = R(ART)
+        )
+    )
 
-	#  Add ListenLiveMenu
-	dir.add(
-		DirectoryObject(
-			title=TEXT_LIVE_SHOWS,
-			summary=TEXT_LIVE_SUMMARY,
-			tagline=TEXT_LIVE_TAGLINE,
-			key=Callback(ListenLiveMenu),
-			thumb=R(ICON_DIREKT),
-			art=R(ART)
-		)
-	)
+    #  Add ProgramsMenu
+    oc.add(
+        DirectoryObject(
+            title = TEXT_PROGRAMS,
+            key = Callback(ProgramsMenu),
+            thumb = R(ICON_ALLA),
+            art = R(ART)
+        )
+    )
 
-	#  Add ProgramsMenu
-	dir.add(
-		DirectoryObject(
-			title=TEXT_PROGRAMS,
-			key=Callback(
-				ProgramsMenu
-			),
-			thumb=R(ICON_ALLA),
-			art=R(ART)
-		)
-	)
+    return oc
 
-	return dir
-
+##########################################################################################
+@route(PREFIX + '/ListenLiveMenu')
 def ListenLiveMenu():
+    oc = ObjectContainer(
+        title2 = TEXT_LIVE_SHOWS,
+        art = R(ART_DIREKT)
+    )
 
-	dir = ObjectContainer(
-		view_group = "List",
-		title1=TEXT_TITLE,
-		title2=TEXT_LIVE_SHOWS,
-		art = R(ART_DIREKT)
-	)
+    data = JSON.ObjectFromURL(CHANNEL_URL, cacheTime = CACHE_TIME_LONG)
+    
+    channelTypes = []
+    for channel in data['channels']:
+        if channel['channeltype'] not in channelTypes:
+            channelType = channel['channeltype']
+            
+            oc.add(
+                DirectoryObject(
+                    key = Callback(ListenLive, channelType = channelType),
+                    title = channelType,
+                    thumb = R(ICON_DIREKT)
+                )
+            )
+            
+            channelTypes.append(channelType)
+    
+    return oc
+    
+##########################################################################################
+@route(PREFIX + '/ListenLive')
+def ListenLive(channelType):
+    oc = ObjectContainer(
+        title2 = unicode(channelType),
+        art = R(ART_DIREKT)
+    )
 
-	page = XML.ElementFromURL(CHANNEL_URL, cacheTime=CACHE_TIME_LONG)
-	channeltypes = page.xpath("//channeltype/text()")
-	typeSet = Set()
-	for i in range(len(channeltypes)):
-		if channeltypes[i] not in typeSet:
-			dir.add (
-				DirectoryObject (
-					title=channeltypes[i],
-					key=Callback(
-						ListenLiveChannelType,
-						channelType = channeltypes[i]
-					),
-					thumb=R(ICON_DIREKT)
-				)
-			)
-			typeSet.add(channeltypes[i])
+    data = JSON.ObjectFromURL(CHANNEL_URL, cacheTime = CACHE_TIME_LONG)
+    
+    for channel in data['channels']:
+        if channel['channeltype'] == channelType:
+            url = channel['liveaudio']['url']
+            title = unicode(channel['name'])
+            thumb = channel['image']
+    
+            # No image provided for extra channels
+            # Use own included
+            if "SR Extra" in title:
+                thumb = R(ICON_EXTRA)
+            
+            oc.add(
+                CreateTrackObject(
+                    url = url,
+                    title = title,
+                    thumb = thumb,
+                    summary = '',
+                    art = None
+                    
+                )
+            )
 
-	return dir
+    return oc
 
-def ListenLiveChannelType(channelType):
-
-	dir = ObjectContainer(
-		view_group = "List",
-		title1=TEXT_TITLE,
-		title2=channelType,
-		art = R(ART_DIREKT)
-	)
-	pageurl = CHANNELTYPE_URL + channelType
-	pageurl = pageurl.replace(" ", "+")
-	page = XML.ElementFromURL(pageurl, cacheTime=CACHE_TIME_LONG)
-
-	for channel in page.getiterator('channel'):
-
-		channelName = channel.attrib.get("name")
-		channelId = channel.attrib.get("id")
-		image = channel.findtext("image")
-		tagline = channel.findtext("tagline")
-		if tagline:
-			fullName = channelName + " - " + tagline
-		else:
-			fullName = channelName
-
-		url = channel.xpath("liveaudio/url/text()")[0]
-
-		# SR uses redirect so lets get the actual url
-		parsedUrl = urlparse.urlparse(url)
-		httpCon = httplib.HTTPConnection(parsedUrl.netloc)
-		httpCon.request('HEAD', parsedUrl.path)
-		httpRes = httpCon.getresponse()
-		url = httpRes.getheader("location")
-
-		# No image provided for extra channels
-		# Use own included
-		if "SR Extra" in channelName:
-			image = R(ICON_EXTRA)
-
-		# disable rightnow info right now since plex
-		# will not present this information
-#		rightnow = XML.ElementFromURL(RIGHTNOW_URL + channelId, cacheTime=None)
-
-		description = ""
-#		currentProgram = rightnow.xpath("/sr/channel/currentscheduledepisode/title/text()")
-#		nextProgram = rightnow.xpath("/sr/channel/nextscheduledepisode/title/text()")
-#		if  currentProgram:
-#			description = currentProgram[0] + "\n"
-#		if nextProgram:
-#			description += TEXT_NEXT_PROGRAM+ ": " + nextProgram[0]
-
-		track = TrackObject(
-			title = fullName,
-			summary = description,
-			key =url,
-			rating_key = MUSIC_PREFIX + "/live/" + channelName,
-			thumb = image,
-			art = R(ART_DIREKT)
-		)
-
-		media = MediaObject(
-			parts = [PartObject(key=Callback(PlayLiveAudio, url=url, ext='mp3'))],
-			container = Container.MP3,
-			audio_codec = AudioCodec.MP3
-		)
-
-		track.add(media)
-		dir.add(track)
-
-	return dir
-
-def PlayLiveAudio(url):
-	return Redirect(url)
-
+##########################################################################################
+@route(PREFIX + '/ProgramsMenu')
 def ProgramsMenu():
-	dir = ObjectContainer(
-		view_group = "List",
-		title1=TEXT_TITLE,
-		title2=TEXT_PROGRAMS,
-		art = R(ART_DIREKT)
-	)
+    oc = ObjectContainer(
+        title2 = TEXT_PROGRAMS,
+        art = R(ART_DIREKT)
+    )
 
-	dir.add(
-		DirectoryObject(
-			title=TEXT_ALL_PROG_TITLE,
-			summary=TEXT_ALL_PROG_SUMMARY,
-			tagline=TEXT_ALL_PROG_TAGLINE,
-			key=Callback(
-				CategoryMenu,
-				categoryid=0,
-				categorytitle=TEXT_ALL_PROG_TITLE
-			),
-			thumb=R(ICON_ALLA),
-			art=R(ART)
-		)
-	)
+    oc.add(
+        DirectoryObject(
+            title = TEXT_ALL_PROG_TITLE,
+            summary = TEXT_ALL_PROG_SUMMARY,
+            tagline = TEXT_ALL_PROG_TAGLINE,
+            key = 
+                Callback(
+                    CategoryMenu,
+                    categoryid = 0,
+                    categorytitle = TEXT_ALL_PROG_TITLE
+                ),
+            thumb = R(ICON_ALLA),
+            art = R(ART)
+        )
+    )
 
-	#  Add Categories
-	page = XML.ElementFromURL(CATEGORY_URL,
-		cacheTime=CACHE_TIME_LONG)
+    #  Add Categories
+    data = JSON.ObjectFromURL(CATEGORY_URL, cacheTime = CACHE_TIME_LONG)
 
-	for item in page.getiterator('programcategory'):
+    for category in data['programcategories']:
+        title = category['name']
+        id = category['id']
+        
+        if "Barn" in title:
+            thumb = R(ICON_BARN)
+        elif "Dokument" in title:
+            thumb = R(ICON_DOKU)
+        elif "Kultur" in title:
+            thumb = R(ICON_KULT)
+        elif "Livsstil" in title:
+            thumb = R(ICON_LIV1)
+        elif "dning" in title:
+            thumb = R(ICON_LIV2)
+        elif "Musik" in title:
+            thumb = R(ICON_MUSI)
+        elif "Nyheter" in title:
+            thumb = R(ICON_NYHE)
+        elif "Sam" in title:
+            thumb = R(ICON_SAMH)
+        elif "Sport" in title:
+            thumb = R(ICON_SPOR)
+        elif "Spr" in title:
+            thumb = R(ICON_SPRA)
+        elif "Vetenskap" in title:
+            thumb = R(ICON_VETE)
+        else:
+            thumb = R(ICON_SR)
 
-		name = item.attrib.get("name")
-		caticon = R(ICON_SR)
-		if "Barn" in name:
-			caticon = R(ICON_BARN)
-		elif "Dokument" in name:
-			caticon = R(ICON_DOKU)
-		elif "Kultur" in name:
-			caticon = R(ICON_KULT)
-		elif "Livsstil" in name:
-			caticon = R(ICON_LIV1)
-		elif "dning" in name:
-			caticon = R(ICON_LIV2)
-		elif "Musik" in name:
-			caticon = R(ICON_MUSI)
-		elif "Nyheter" in name:
-			caticon = R(ICON_NYHE)
-		elif "Sam" in name:
-			caticon = R(ICON_SAMH)
-		elif "Sport" in name:
-			caticon = R(ICON_SPOR)
-		elif "Spr" in name:
-			caticon = R(ICON_SPRA)
-		elif "Vetenskap" in name:
-			caticon = R(ICON_VETE)
-		else:
-			caticon = R(ICON_SR)
+        oc.add(
+            DirectoryObject(
+                title = unicode(title),
+                key = 
+                    Callback(
+                        CategoryMenu,
+                        categoryid = id,
+                        categorytitle = title
+                    ),
+                thumb = thumb,
+                art = R(ART)
+            )
+        )
+    return oc
 
-		dir.add(
-			DirectoryObject(
-				title=name,
-				key=Callback(
-					CategoryMenu,
-					categoryid=int(item.attrib.get("id", default="0")),
-					categorytitle=name
-				),
-				thumb=caticon,
-				art=R(ART)
-			)
-		)
-	return dir
-
-
+##########################################################################################
+@route(PREFIX + '/CategoryMenu')
 def CategoryMenu(categoryid, categorytitle):
+    oc = ObjectContainer(
+        title2 = unicode(categorytitle),
+        art = R(ART)
+    )
 
-	dir = ObjectContainer(
-		view_group = "List",
-		title1 = TEXT_TITLE,
-		title2 = categorytitle,
-		art = R(ART)
-	)
+    if categoryid == 0:
+        programURL = PROGRAMS_URL
+    else:
+        programURL = PROGRAMS_CATEGORY_URL + str(categoryid)
 
-	if categoryid == 0:
-		programUrl = PROGRAMS_URL
-	else:
-		programUrl = PROGRAMS_CATEGORY_URL + str(categoryid)
+    data = JSON.ObjectFromURL(programURL, cacheTime = CACHE_TIME_SHORT)
 
-	page = XML.ElementFromURL(programUrl, cacheTime=CACHE_TIME_SHORT)
+    for program in data['programs']:
+        title = program['name']
+        programId = program['id']
+        summary = program['description']
+        broadcastInfo = program['broadcastinfo']
+        
+        if broadcastInfo:
+            summary = summary + "\r\n\r\n" + broadcastInfo
+        
+        thumb = program['programimage']
+        hasOndemand = program['hasondemand']
+        hasPod = program['haspod']
+        art = program['socialimage']
 
-	for program in page.getiterator('program'):
+        try:
+            tagline = unicode(program['payoff'])
+        except:
+            tagline = None
 
-		name = program.attrib.get("name")
-		programId = program.attrib.get("id")
-		description = program.findtext("description")
-		broadcastInfo = program.findtext("broadcastinfo")
-		if broadcastInfo:
-			description += "\n\n" + broadcastInfo
-		programImage = program.findtext("programimage")
-		hasOndemand = program.findtext("hasondemand")
-		hasPod = program.findtext("haspod")
+        #  Add ProgramMenu
+        oc.add(
+            DirectoryObject(
+                title = unicode(title),
+                key = 
+                    Callback(
+                        ProgramMenu,
+                        progId = programId,
+                        name = title,
+                        description = summary,
+                        programImage = thumb,
+                        hasOndemand = hasOndemand,
+                        hasPod = hasPod
+                    ),
+                tagline = tagline,
+                summary = unicode(summary),
+                thumb = thumb,
+                art = art
+            )
+        )
 
+    return oc
 
-		#  Add ProgramMenu
-		dir.add(
-			DirectoryObject(
-				title = name,
-				key = Callback(
-					ProgramMenu,
-					progId = programId,
-					name = name,
-					description = description,
-					programImage = programImage,
-					hasOndemand = hasOndemand,
-					hasPod = hasPod
-				),
-#				tagline = program.findtext("payoff"),
-				summary = description,
-		#		thumb = programImage,
-				art = programImage
-			)
-		)
-
-	return dir
-
+##########################################################################################
+@route(PREFIX + '/ProgramMenu', hasOndemand = bool, hasPod = bool)
 def ProgramMenu(progId, name, description, programImage, hasOndemand, hasPod):
+    oc = ObjectContainer(
+        title2 = unicode(name),
+        art = programImage
+    )
 
-	dir = ObjectContainer(
-		view_group="InfoList",
-		title1 = TEXT_TITLE,
-		title2 = name,
-		art = programImage
-	)
+    if hasOndemand:
+        oc.add(
+            DirectoryObject (
+                title = TEXT_BROADCAST_TITLE,
+                key = 
+                    Callback (
+                        ProgramBroadcast,
+                        progId = progId,
+                        progName = name,
+                        progImage = programImage
+                    ),
+                summary = unicode(description),
+                thumb = R(ICON_SR)
+            )
+        )
 
-	if hasOndemand == "true":
-		dir.add (
-			DirectoryObject (
-				title = TEXT_BROADCAST_TITLE,
-				key = Callback (
-					ProgramBroadcast,
-					progId = progId,
-					progName = name,
-					progImage = programImage
-				),
-				summary = description,
-				thumb = R(ICON_SR)
-			)
-		)
+    if hasPod:
+        oc.add(
+            DirectoryObject (
+                title = TEXT_POD_TITLE,
+                key = 
+                    Callback (
+                        ProgramPods,
+                        progId = progId,
+                        progName = name,
+                        progImage = programImage
+                    ),
+                summary = unicode(description),
+                thumb = R(ICON_ARKIV)
+            )
+        )
 
-	if hasPod == "true":
-		dir.add (
-			DirectoryObject (
-				title = TEXT_POD_TITLE,
-				key = Callback (
-					ProgramPods,
-					progId = progId,
-					progName = name,
-					progImage = programImage
-				),
-				summary = description,
-				thumb = R(ICON_ARKIV)
-			)
-		)
+    return oc
 
-	return dir
-
+##########################################################################################
+@route(PREFIX + '/ProgramPods')
 def ProgramPods(progId, progName, progImage):
+    oc = ObjectContainer(
+        title2 = unicode(progName),
+        art = progImage
+    )
 
-	dir = ObjectContainer (
-		view_group="InfoList",
-		title1 = TEXT_TITLE,
-		title2 = progName,
-		art = progImage
-	)
+    data = JSON.ObjectFromURL(POD_URL + progId, cacheTime = CACHE_TIME_SHORT)
 
-	files = XML.ElementFromURL(POD_URL + progId, cacheTime=CACHE_TIME_SHORT)
+    for progFile in data['podfiles']:
+        title = progFile['title']
+        duration = progFile['duration']
+        filesize = progFile['filesizeinbytes']
 
-	for progFile in files.getiterator("podfile"):
-		title = progFile.findtext("title")
-		duration = int(progFile.findtext("duration"))
-		filesize = int(progFile.findtext("filesizeinbytes"))
+        # SR API Bug
+        # Some podcasts have incorrect duration
+        # Use filesize to calculate duration
+        # All Podscasts are encoded in 96 kbits/s
+        # Expect that a pod cast that is longer than
+        # 10 hours are incorrect
+        if duration > 36000:
+            duration = filesize / 12000
 
-		# SR API Bug
-		# Some podcasts have incorrect duration
-		# Use filesize to calculate duration
-		# All Podscasts are encoded in 96 kbits/s
-		# Expect that a pod cast that is longer than
-		# 10 hours are incorrect
-		if duration > 36000:
-			duration = filesize / 12000
+        duration = duration * 1000
+        description = progFile['description']
+        url = progFile['url']
+        
+        oc.add(
+            CreateTrackObject(
+                url = url,
+                title = title,
+                thumb = progImage,
+                summary = description,
+                art = progImage,
+                duration = duration
+            )
+        )
 
-		duration = duration * 1000
-		description = progFile.findtext("description")
-		key = progFile.findtext("statkey")
-		url = progFile.findtext("url")
+    return oc
 
-		track = TrackObject (
-			title = title,
-			key = key,
-			summary = description,
-			rating_key = MUSIC_PREFIX + key,
-			thumb = progImage,
-			duration = duration
-		)
-
-		media = MediaObject (
-			audio_codec = AudioCodec.MP3,
-			duration = duration
-		)
-
-		media.add(PartObject(key = url, duration = duration))
-		track.add(media)
-		dir.add(track)
-
-	return dir
-
+##########################################################################################
+@route(PREFIX + '/ProgramBroadcast')
 def ProgramBroadcast(progId, progName, progImage):
+    oc = ObjectContainer(
+        title2 = unicode(progName),
+        art = progImage
+    )
 
-	dir = ObjectContainer (
-		view_group="InfoList",
-		title1 = TEXT_TITLE,
-		title2 = progName,
-		art = progImage
-	)
+    data = JSON.ObjectFromURL(BROADCAST_URL + progId, cacheTime = CACHE_TIME_SHORT)
 
-	files = XML.ElementFromURL(BROADCAST_URL + progId, cacheTime=CACHE_TIME_SHORT)
+    for broadcast in data['broadcasts']:
+        title = broadcast['title']
+        duration = broadcast['totalduration'] * 1000
+        summary = broadcast['description']
+        
+        if len(broadcast['broadcastfiles']) > 1:
+            part = 1
+            for file in broadcast['broadcastfiles']:
+                title = broadcast['title'] + ' - Del ' + str(part)
+                url = file['url']
+                duration = file['duration']
+                
+                oc.add(
+                    CreateTrackObject(
+                        url = url,
+                        title = title,
+                        thumb = progImage,
+                        summary = summary,
+                        art = progImage,
+                        duration = duration
+                    )
+                )     
+        else:
+            url = broadcast['broadcastfiles'][0]['url']
+            oc.add(
+                CreateTrackObject(
+                    url = url,
+                    title = title,
+                    thumb = progImage,
+                    summary = summary,
+                    art = progImage,
+                    duration = duration
+                )
+            )
 
-	for progFile in files.getiterator("broadcast"):
-		title = progFile.findtext("title")
-		duration = int(int(progFile.findtext("totalduration")) * 1000)
-		description = progFile.findtext("description")
+    return oc
 
-		track = TrackObject (
-			title = title,
-			key = BROADCAST_URL + progId,
-			summary = description,
-			rating_key =MUSIC_PREFIX + BROADCAST_URL + progId,
-			thumb = progImage,
-			duration = duration
-		)
+####################################################################################################
+@route(PREFIX + '/CreateTrackObject', include_container = bool) 
+def CreateTrackObject(url, title, thumb, summary, art, duration = None, include_container = False):
+    items = []
 
-		media = MediaObject (
-			audio_codec = AudioCodec.AAC,
-			duration = duration
-		)
+    if '.mp3' in url:
+        codec = AudioCodec.MP3
+        container = Container.MP3
+        key = Callback(PlayMP3, url = url)
+        
+    elif '.m4a' in url:
+        codec = AudioCodec.AAC
+        container = Container.MP4
+        key = Callback(PlayM4A, url = url)
+        
+    else:
+        codec = None
+        container = None
+        key = Callback(PlayAudio, url = url)
 
-		for brfile in progFile.getiterator("broadcastfile"):
-			brDuration = brfile.findtext("duration")
-			brUrl = brfile.findtext("url")
-			media.add(PartObject(key=brUrl, duration=brDuration))
+    streams = [
+        AudioStreamObject(
+            codec = codec,
+            duration = duration,
+            channels = 2
+        )
+    ]
 
-		track.add(media)
-		dir.add(track)
+    items.append(
+        MediaObject(
+            container = container,
+            audio_codec = codec,
+            audio_channels = 2,
+            duration = duration,
+            parts = [
+                PartObject(
+                    key = key,
+                    streams = streams
+                )
+            ]
+        )
+    )
+        
+    to = TrackObject(
+            key = 
+                Callback(
+                    CreateTrackObject,
+                    url = url,
+                    title = title,
+                    thumb = thumb,
+                    summary = summary,
+                    art = art,
+                    duration = duration,
+                    include_container = True
+                ),
+            rating_key = title,
+            title = unicode(title),
+            thumb = thumb,
+            summary = unicode(summary),
+            items = items,
+            art = art
+    )
+   
+    if include_container:
+        return ObjectContainer(objects = [to])
+    else:
+        return to
 
-	return dir
+#################################################################################################### 
+@route(PREFIX + '/PlayMP3.mp3')
+def PlayMP3(url):
+    return Redirect(url)
+    
+#################################################################################################### 
+@route(PREFIX + '/PlayM4A.m4a')
+def PlayM4A(url):
+    return Redirect(url)
+
+#################################################################################################### 
+@route(PREFIX + '/PlayAudio')
+def PlayAudio(url):
+    return Redirect(url)
 
 # End of file

@@ -8,13 +8,5 @@
     <string>2</string>
     <key>PlexClientPlatforms</key>
 	<string>*</string>
-    <key>PlexPluginMode</key>
-    <string>AlwaysOn</string>
-    <key>PlexPluginClass</key>
-    <string>Content</string>
-    <key>PlexPluginConsoleLogging</key>
-    <string>1</string>
-	<key>PlexPluginDevMode</key>
-	<string>0</string>
   </dict>
 </plist>

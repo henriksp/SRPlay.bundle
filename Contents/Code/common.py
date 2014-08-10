@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*
 
 # Global constants
-MUSIC_PREFIX = "/music/sverigesradioplay"
+PREFIX = "/video/sverigesradioplay"
 
 # URLs
 BASE_URL      = "http://sverigesradio.se/api/v2/"
-CATEGORY_URL  = BASE_URL + "programcategories?pagination=false"
-CHANNEL_URL   = BASE_URL + "channels?pagination=false"
+CATEGORY_URL  = BASE_URL + "programcategories?pagination=false&format=json"
+CHANNEL_URL   = BASE_URL + "channels?pagination=false&format=json"
 CHANNELTYPE_URL = CHANNEL_URL + "&filter=channel.channeltype&filtervalue="
 RIGHTNOW_URL = BASE_URL + "scheduledepisodes/rightnow?channelid="
-PROGRAMS_URL  = BASE_URL + "programs?pagination=false"
-PROGRAMS_CATEGORY_URL = BASE_URL + "programs/index?pagination=false&programcategoryid="
+PROGRAMS_URL  = BASE_URL + "programs?pagination=false&format=json"
+PROGRAMS_CATEGORY_URL = BASE_URL + "programs/index?pagination=false&format=json&programcategoryid="
 PROGRAM_URL   = BASE_URL + "programs/"
-POD_URL = BASE_URL + "podfiles?pagination=false&programid="
-BROADCAST_URL = BASE_URL + "broadcasts?pagination=false&programid="
+POD_URL = BASE_URL + "podfiles?pagination=false&format=json&programid="
+BROADCAST_URL = BASE_URL + "broadcasts?pagination=false&format=json&programid="
 
 # Art & Icons
 ART           = 'art-default.jpg'
