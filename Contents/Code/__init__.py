@@ -270,7 +270,7 @@ def ProgramMenu(progId, name, description, programImage, hasOndemand, hasPod):
     return oc
 
 ##########################################################################################
-@route(PREFIX + '/ProgramPods')
+@route(PREFIX + '/ProgramPods', allow_sync = True)
 def ProgramPods(progId, progName, progImage):
     oc = ObjectContainer(
         title2 = unicode(progName),
@@ -311,7 +311,7 @@ def ProgramPods(progId, progName, progImage):
     return oc
 
 ##########################################################################################
-@route(PREFIX + '/ProgramBroadcast')
+@route(PREFIX + '/ProgramBroadcast', allow_sync = True)
 def ProgramBroadcast(progId, progName, progImage):
     oc = ObjectContainer(
         title2 = unicode(progName),
